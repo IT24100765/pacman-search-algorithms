@@ -360,8 +360,19 @@ def cornersHeuristic(state: Any, problem: CornersProblem):
     corners = problem.corners # These are the corner coordinates
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
 
-    "*** YOUR CODE HERE ***"
-    return 0 # Default to trivial solution
+    position, unvisitedCorners = state
+    if not unvisitedCorners:
+        return 0
+
+    import itertools
+    min_cost = float('inf')
+    for perm in itertools.permutations(unvisitedCorners):
+        cost = util.manhattanDistance(position, perm[0])
+        for i in range(len(perm) - 1):
+            cost += util.manhattanDistance(perm[i], perm[i+1])
+        if cost < min_cost:
+            min_cost = cost
+    return min_cost
 
 class AStarCornersAgent(SearchAgent):
     "A SearchAgent for FoodSearchProblem using A* and your foodHeuristic"
