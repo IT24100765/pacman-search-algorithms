@@ -360,8 +360,19 @@ def cornersHeuristic(state: Any, problem: CornersProblem):
     corners = problem.corners # These are the corner coordinates
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
 
-    "*** YOUR CODE HERE ***"
-    return 0 # Default to trivial solution
+    position, unvisitedCorners = state
+    if not unvisitedCorners:
+        return 0
+
+    import itertools
+    min_cost = float('inf')
+    for perm in itertools.permutations(unvisitedCorners):
+        cost = util.manhattanDistance(position, perm[0])
+        for i in range(len(perm) - 1):
+            cost += util.manhattanDistance(perm[i], perm[i+1])
+        if cost < min_cost:
+            min_cost = cost
+    return min_cost
 
 class AStarCornersAgent(SearchAgent):
     "A SearchAgent for FoodSearchProblem using A* and your foodHeuristic"
@@ -454,8 +465,52 @@ def foodHeuristic(state: Tuple[Tuple, List[List]], problem: FoodSearchProblem):
     problem.heuristicInfo['wallCount']
     """
     position, foodGrid = state
-    "*** YOUR CODE HERE ***"
-    return 0
+    foodList = foodGrid.asList()
+    if not foodList:
+        return 0
+
+    if 'distances' not in problem.heuristicInfo:
+        problem.heuristicInfo['distances'] = {}
+
+    distances = problem.heuristicInfo['distances']
+
+    def getDists(p):
+        if p not in distances:
+            dists = {p: 0}
+            queue = [p]
+            idx = 0
+            walls = problem.walls
+            while idx < len(queue):
+                curr = queue[idx]
+                d = dists[curr]
+                idx += 1
+                cx, cy = curr
+                for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
+                    nx, ny = cx + dx, cy + dy
+                    if not walls[nx][ny] and (nx, ny) not in dists:
+                        dists[(nx, ny)] = d + 1
+                        queue.append((nx, ny))
+            distances[p] = dists
+        return distances[p]
+
+    p_dists = getDists(position)
+
+    if len(foodList) == 1:
+        return p_dists[foodList[0]]
+
+    max_val = 0
+    for i in range(len(foodList)):
+        f1 = foodList[i]
+        d1 = p_dists[f1]
+        f1_dists = getDists(f1)
+        for j in range(i, len(foodList)):
+            f2 = foodList[j]
+            d2 = p_dists[f2]
+            val = min(d1, d2) + f1_dists[f2]
+            if val > max_val:
+                max_val = val
+
+    return max_val
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
