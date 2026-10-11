@@ -7,7 +7,7 @@
 
 > A comprehensive implementation of classical search algorithms in Pac-Man, featuring uninformed search strategies (DFS, BFS, UCS) and informed search with A*, coupled with admissible and consistent heuristics.
 
----
+----
 
 ## 📋 Table of Contents
 
@@ -80,6 +80,8 @@ pacman-search-algorithms/
 ---
 
 ## ⚙️ Environment Setup
+
+
 
 ### Prerequisites
 
